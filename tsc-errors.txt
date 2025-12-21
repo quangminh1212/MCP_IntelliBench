@@ -1,0 +1,66 @@
+﻿src/core/benchmark/engine.ts(17,5): error TS6196: 'ScoreBreakdown' is declared but never used.
+src/core/benchmark/engine.ts(93,74): error TS2379: Argument of type '{ category: ChallengeCategory | undefined; difficulty: Difficulty | "all" | undefined; limit: number; }' is not assignable to parameter of type 'ChallengeFilter' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'category' are incompatible.
+    Type 'ChallengeCategory | undefined' is not assignable to type 'ChallengeCategory'.
+      Type 'undefined' is not assignable to type 'ChallengeCategory'.
+src/core/benchmark/engine.ts(116,15): error TS2375: Type '{ name: string | undefined; categories: ChallengeCategory[] | undefined; difficulty: Difficulty | "all" | undefined; maxChallenges: number; randomize: boolean; }' is not assignable to type 'SessionConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'name' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/core/benchmark/engine.ts(128,13): error TS2322: Type '"in_progress"' is not assignable to type 'SessionStatus'.
+src/core/benchmark/engine.ts(408,9): error TS2375: Type '{ category: ChallengeCategory | undefined; timeframe: LeaderboardTimeframe; entries: { rank: number; aiModel: string; score: number; maxScore: number; percentage: number; challengesCompleted: number; completedAt: string; }[]; totalEntries: number; updatedAt: string; }' is not assignable to type 'Leaderboard' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'category' are incompatible.
+    Type 'ChallengeCategory | undefined' is not assignable to type 'ChallengeCategory'.
+      Type 'undefined' is not assignable to type 'ChallengeCategory'.
+src/core/benchmark/engine.ts(422,66): error TS2345: Argument of type '"completed"' is not assignable to parameter of type 'SessionStatus'.
+src/core/scoring/engine.ts(8,33): error TS6133: 'SCORE_THRESHOLDS' is declared but its value is never read.
+src/core/scoring/engine.ts(72,56): error TS6133: 'challenge' is declared but its value is never read.
+src/core/sessions/manager.ts(25,15): error TS2375: Type '{ status: SessionStatus; completedAt: string | undefined; id: string; name: string; aiModel?: string; config: SessionConfig; challengeIds: readonly string[]; currentChallengeIndex: number; results: readonly ChallengeResult[]; startedAt: ISOTimestamp; totalTime?: number; }' is not assignable to type 'Session' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'completedAt' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/server/index.ts(40,21): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(optionsOrStream?: DestinationStream | LoggerOptions<never, boolean> | undefined): Logger<never, boolean>', gave the following error.
+    Argument of type '{ name: "intellibench"; level: string; transport: { target: string; options: { colorize: boolean; }; } | undefined; }' is not assignable to parameter of type 'DestinationStream | LoggerOptions<never, boolean> | undefined'.
+      Type '{ name: "intellibench"; level: string; transport: { target: string; options: { colorize: boolean; }; } | undefined; }' is not assignable to type 'LoggerOptions<never, boolean>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+        Types of property 'transport' are incompatible.
+          Type '{ target: string; options: { colorize: boolean; }; } | undefined' is not assignable to type 'TransportSingleOptions<Record<string, any>> | TransportMultiOptions<Record<string, any>> | TransportPipelineOptions<Record<string, any>>'.
+            Type 'undefined' is not assignable to type 'TransportSingleOptions<Record<string, any>> | TransportMultiOptions<Record<string, any>> | TransportPipelineOptions<Record<string, any>>'.
+  Overload 2 of 2, '(options: LoggerOptions<never, boolean>, stream?: DestinationStream | undefined): Logger<never, boolean>', gave the following error.
+    Argument of type '{ name: "intellibench"; level: string; transport: { target: string; options: { colorize: boolean; }; } | undefined; }' is not assignable to parameter of type 'LoggerOptions<never, boolean>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'transport' are incompatible.
+        Type '{ target: string; options: { colorize: boolean; }; } | undefined' is not assignable to type 'TransportSingleOptions<Record<string, any>> | TransportMultiOptions<Record<string, any>> | TransportPipelineOptions<Record<string, any>>'.
+          Type 'undefined' is not assignable to type 'TransportSingleOptions<Record<string, any>> | TransportMultiOptions<Record<string, any>> | TransportPipelineOptions<Record<string, any>>'.
+src/server/index.ts(98,53): error TS2345: Argument of type '(request: { method: "tools/call"; params: { name: string; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; task?: { ...; } | undefined; arguments?: Record<...> | undefined; }; }) => Promise<...>' is not assignable to parameter of type '(request: { method: "tools/call"; params: { name: string; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; task?: { ...; } | undefined; arguments?: Record<...> | undefined; }; }, extra: RequestHandler...'.
+  Type 'Promise<ToolResult>' is not assignable to type '{ [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; } | ServerResult | Promise<...>'.
+    Type 'Promise<ToolResult>' is not assignable to type 'Promise<{ [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; } | ServerResult>'.
+      Type 'ToolResult' is not assignable to type '{ [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; } | ServerResult'.
+        Property 'task' is missing in type 'ToolResult' but required in type '{ [x: string]: unknown; task: { taskId: string; status: "completed" | "working" | "input_required" | "failed" | "cancelled"; ttl: number | null; createdAt: string; lastUpdatedAt: string; pollInterval?: number | undefined; statusMessage?: string | undefined; }; _meta?: { ...; } | undefined; }'.
+src/server/index.ts(126,57): error TS2345: Argument of type '(request: { method: "resources/read"; params: { uri: string; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; }; }) => Promise<...>' is not assignable to parameter of type '(request: { method: "resources/read"; params: { uri: string; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; }; }, extra: RequestHandlerExtra<...>) => { ...; } | ... 1 more ... | Promise<...>'.
+  Type 'Promise<ResourceResult>' is not assignable to type '{ [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; } | ServerResult | Promise<...>'.
+    Type 'Promise<ResourceResult>' is not assignable to type 'Promise<{ [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; } | ServerResult>'.
+      Type 'ResourceResult' is not assignable to type '{ [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; } | ServerResult'.
+        Property 'task' is missing in type 'ResourceResult' but required in type '{ [x: string]: unknown; task: { taskId: string; status: "completed" | "working" | "input_required" | "failed" | "cancelled"; ttl: number | null; createdAt: string; lastUpdatedAt: string; pollInterval?: number | undefined; statusMessage?: string | undefined; }; _meta?: { ...; } | undefined; }'.
+src/server/index.ts(153,54): error TS2345: Argument of type '(request: { method: "prompts/get"; params: { name: string; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; arguments?: Record<...> | undefined; }; }) => Promise<...>' is not assignable to parameter of type '(request: { method: "prompts/get"; params: { name: string; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; arguments?: Record<...> | undefined; }; }, extra: RequestHandlerExtra<...>) => { ...; } | .....'.
+  Type 'Promise<PromptResult>' is not assignable to type '{ [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; } | ServerResult | Promise<...>'.
+    Type 'Promise<PromptResult>' is not assignable to type 'Promise<{ [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; } | ServerResult>'.
+      Type 'PromptResult' is not assignable to type '{ [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; "io.modelcontextprotocol/related-task"?: { taskId: string; } | undefined; } | undefined; } | ServerResult'.
+        Property 'task' is missing in type 'PromptResult' but required in type '{ [x: string]: unknown; task: { taskId: string; status: "completed" | "working" | "input_required" | "failed" | "cancelled"; ttl: number | null; createdAt: string; lastUpdatedAt: string; pollInterval?: number | undefined; statusMessage?: string | undefined; }; _meta?: { ...; } | undefined; }'.
+src/server/tools/index.ts(9,5): error TS6196: 'Session' is declared but never used.
+src/server/tools/index.ts(10,5): error TS6196: 'Challenge' is declared but never used.
+src/server/tools/index.ts(11,5): error TS6196: 'ChallengeResult' is declared but never used.
+src/server/tools/index.ts(12,5): error TS6196: 'SessionResults' is declared but never used.
+src/server/tools/index.ts(13,5): error TS6196: 'Leaderboard' is declared but never used.
+src/server/tools/index.ts(14,5): error TS6196: 'ChallengeSummary' is declared but never used.
+src/server/tools/index.ts(345,64): error TS2379: Argument of type '{ name: string | undefined; categories: ChallengeCategory[] | undefined; difficulty: Difficulty | "all" | undefined; maxChallenges: number | undefined; }' is not assignable to parameter of type 'StartSessionOptions' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'name' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/server/tools/index.ts(447,70): error TS2379: Argument of type '{ category: ChallengeCategory | undefined; limit: number | undefined; timeframe: "all" | "daily" | "weekly" | "monthly" | undefined; }' is not assignable to parameter of type 'LeaderboardOptions' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'category' are incompatible.
+    Type 'ChallengeCategory | undefined' is not assignable to type 'ChallengeCategory'.
+      Type 'undefined' is not assignable to type 'ChallengeCategory'.
+src/server/tools/index.ts(467,73): error TS2379: Argument of type '{ category: ChallengeCategory | undefined; difficulty: Difficulty | "all" | undefined; limit: number | undefined; }' is not assignable to parameter of type 'ChallengeFilter' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'category' are incompatible.
+    Type 'ChallengeCategory | undefined' is not assignable to type 'ChallengeCategory'.
+      Type 'undefined' is not assignable to type 'ChallengeCategory'.
