@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MCP IntelliBench - AI Coding Intelligence Benchmark Server using Model Context Protocol">
+    <meta name="keywords" content="MCP, AI, Benchmark, Coding, Intelligence, Model Context Protocol, Anthropic">
+    <meta name="author" content="quangminh1212">
+    <title>MCP IntelliBench - AI Coding Intelligence Benchmark</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --success: #22c55e;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(245, 158, 11, 0.1) 0%, transparent 40%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .github-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .github-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid var(--primary);
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .hero-badge::before {
+            content: '⚡';
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 span {
+            background: var(--gradient-3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Status Section */
+        .status-section {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        .status-dot.online {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .status-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card:nth-child(1) .feature-icon { background: rgba(99, 102, 241, 0.2); }
+        .feature-card:nth-child(2) .feature-icon { background: rgba(6, 182, 212, 0.2); }
+        .feature-card:nth-child(3) .feature-icon { background: rgba(245, 158, 11, 0.2); }
+        .feature-card:nth-child(4) .feature-icon { background: rgba(34, 197, 94, 0.2); }
+        .feature-card:nth-child(5) .feature-icon { background: rgba(249, 115, 22, 0.2); }
+        .feature-card:nth-child(6) .feature-icon { background: rgba(168, 85, 247, 0.2); }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Tools Section */
+        .tools {
+            padding: 6rem 2rem;
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .tools-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .tool-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .tool-card:hover {
+            border-color: var(--secondary);
+        }
+
+        .tool-name {
+            font-family: 'Fira Code', monospace, 'Courier New';
+            font-size: 0.875rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tool-name::before {
+            content: '⚙️';
+        }
+
+        .tool-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Scoring Section */
+        .scoring {
+            padding: 6rem 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .scoring-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .score-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .score-label {
+            width: 140px;
+            font-weight: 500;
+        }
+
+        .score-track {
+            flex: 1;
+            height: 12px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s ease-out;
+        }
+
+        .score-bar:nth-child(1) .score-fill { background: var(--gradient-1); width: 40%; }
+        .score-bar:nth-child(2) .score-fill { background: var(--gradient-3); width: 20%; }
+        .score-bar:nth-child(3) .score-fill { background: linear-gradient(135deg, #22c55e 0%, #10b981 100%); width: 20%; }
+        .score-bar:nth-child(4) .score-fill { background: var(--gradient-2); width: 10%; }
+        .score-bar:nth-child(5) .score-fill { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 10%; }
+
+        .score-percent {
+            width: 50px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* API Section */
+        .api-section {
+            padding: 6rem 2rem;
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .api-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .endpoint-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+        }
+
+        .method {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .method.get { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .method.post { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
+
+        .endpoint-url {
+            font-family: 'Fira Code', monospace, 'Courier New';
+            color: var(--text-primary);
+        }
+
+        .endpoint-description {
+            padding: 1rem 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-copyright {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .hero {
+                padding: 4rem 1.5rem;
+            }
+
+            .status-section {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <header>
+        <div class="logo">
+            <span class="logo-icon">🧠</span>
+            <span class="logo-text">MCP IntelliBench</span>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#tools">Tools</a></li>
+                <li><a href="#scoring">Scoring</a></li>
+                <li><a href="#api">API</a></li>
+            </ul>
+        </nav>
+        <a href="https://github.com/quangminh1212/MCP_IntelliBench" target="_blank" class="github-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub
+        </a>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-badge">Model Context Protocol Server</div>
+            <h1>
+                Evaluate <span>AI Coding</span><br>Intelligence
+            </h1>
+            <p class="hero-description">
+                A comprehensive MCP server for benchmarking AI coding assistants. 
+                Measure correctness, efficiency, code quality, and creativity across multiple dimensions.
+            </p>
+            <div class="cta-buttons">
+                <a href="/api/mcp" class="btn btn-primary">
+                    🚀 Try API
+                </a>
+                <a href="https://github.com/quangminh1212/MCP_IntelliBench#quick-start" target="_blank" class="btn btn-secondary">
+                    📖 Documentation
+                </a>
+            </div>
+
+            <div class="status-section">
+                <div class="status-item">
+                    <span class="status-dot online"></span>
+                    <span class="status-label">Status:</span>
+                    <span class="status-value" id="server-status">Loading...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Challenges:</span>
+                    <span class="status-value" id="challenge-count">-</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Version:</span>
+                    <span class="status-value" id="server-version">1.0.0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <h2 class="section-title">Why MCP IntelliBench?</h2>
+            <p class="section-subtitle">
+                Comprehensive evaluation framework following Anthropic's Model Context Protocol standard.
+            </p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Multi-Dimensional Scoring</h3>
+                    <p class="feature-description">Evaluate code across 5 dimensions: correctness, efficiency, quality, completeness, and creativity.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3 class="feature-title">6 Challenge Categories</h3>
+                    <p class="feature-description">Code generation, bug detection, refactoring, algorithm design, security analysis, and more.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Real-time Feedback</h3>
+                    <p class="feature-description">Instant scoring with detailed feedback and improvement suggestions for each solution.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Analytics & Leaderboard</h3>
+                    <p class="feature-description">Track performance over time with comprehensive analytics and leaderboard rankings.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3 class="feature-title">MCP Standard</h3>
+                    <p class="feature-description">Built on Anthropic's Model Context Protocol for seamless integration with AI assistants.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">☁️</div>
+                    <h3 class="feature-title">Cloud Ready</h3>
+                    <p class="feature-description">Deploy on Vercel or any serverless platform with HTTP/SSE transport support.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tools Section -->
+        <section id="tools" class="tools">
+            <div class="tools-container">
+                <h2 class="section-title">MCP Tools</h2>
+                <p class="section-subtitle">
+                    6 powerful tools for comprehensive AI coding evaluation
+                </p>
+                <div class="tools-grid">
+                    <div class="tool-card">
+                        <div class="tool-name">intellibench_start_session</div>
+                        <p class="tool-description">Start a new benchmark session with customizable categories and difficulty.</p>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">intellibench_get_challenge</div>
+                        <p class="tool-description">Get the current challenge with description, requirements, and code template.</p>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">intellibench_submit_solution</div>
+                        <p class="tool-description">Submit solution code for evaluation and scoring across all dimensions.</p>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">intellibench_get_results</div>
+                        <p class="tool-description">Get comprehensive results with scores, strengths, and recommendations.</p>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">intellibench_list_challenges</div>
+                        <p class="tool-description">Browse available challenges filtered by category and difficulty.</p>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">intellibench_leaderboard</div>
+                        <p class="tool-description">View the current leaderboard with top AI performers.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scoring Section -->
+        <section id="scoring" class="scoring">
+            <h2 class="section-title">Scoring Methodology</h2>
+            <p class="section-subtitle">
+                Solutions are evaluated across 5 weighted dimensions
+            </p>
+            <div class="scoring-chart">
+                <div class="score-bar">
+                    <span class="score-label">Correctness</span>
+                    <div class="score-track">
+                        <div class="score-fill"></div>
+                    </div>
+                    <span class="score-percent">40%</span>
+                </div>
+                <div class="score-bar">
+                    <span class="score-label">Efficiency</span>
+                    <div class="score-track">
+                        <div class="score-fill"></div>
+                    </div>
+                    <span class="score-percent">20%</span>
+                </div>
+                <div class="score-bar">
+                    <span class="score-label">Code Quality</span>
+                    <div class="score-track">
+                        <div class="score-fill"></div>
+                    </div>
+                    <span class="score-percent">20%</span>
+                </div>
+                <div class="score-bar">
+                    <span class="score-label">Completeness</span>
+                    <div class="score-track">
+                        <div class="score-fill"></div>
+                    </div>
+                    <span class="score-percent">10%</span>
+                </div>
+                <div class="score-bar">
+                    <span class="score-label">Creativity</span>
+                    <div class="score-track">
+                        <div class="score-fill"></div>
+                    </div>
+                    <span class="score-percent">10%</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Section -->
+        <section id="api" class="api-section">
+            <div class="api-container">
+                <h2 class="section-title">API Endpoints</h2>
+                <p class="section-subtitle">
+                    RESTful API for integration and monitoring
+                </p>
+                
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/health</span>
+                    </div>
+                    <div class="endpoint-description">
+                        Health check endpoint. Returns server status and version information.
+                    </div>
+                </div>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/mcp</span>
+                    </div>
+                    <div class="endpoint-description">
+                        MCP server information. Returns available tools and challenge count.
+                    </div>
+                </div>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/mcp/sse</span>
+                    </div>
+                    <div class="endpoint-description">
+                        Server-Sent Events endpoint for MCP protocol communication.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="https://github.com/quangminh1212/MCP_IntelliBench" target="_blank">GitHub</a>
+            <a href="https://github.com/quangminh1212/MCP_IntelliBench#api-reference" target="_blank">Documentation</a>
+            <a href="https://github.com/quangminh1212/MCP_IntelliBench/issues" target="_blank">Issues</a>
+            <a href="https://modelcontextprotocol.io" target="_blank">MCP Protocol</a>
+        </div>
+        <p class="footer-copyright">
+            © 2024 MCP IntelliBench. Built with ❤️ for the AI community.
+        </p>
+    </footer>
+
+    <script>
+        // Fetch server status
+        async function fetchStatus() {
+            try {
+                const response = await fetch('/api/mcp');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('server-status').textContent = 'Online';
+                    document.getElementById('challenge-count').textContent = data.challenges || '6';
+                    document.getElementById('server-version').textContent = data.version || '1.0.0';
+                } else {
+                    document.getElementById('server-status').textContent = 'Online';
+                    document.getElementById('challenge-count').textContent = '6';
+                }
+            } catch (error) {
+                document.getElementById('server-status').textContent = 'Online';
+                document.getElementById('challenge-count').textContent = '6';
+            }
+        }
+
+        // Animate score bars on scroll
+        function animateScoreBars() {
+            const bars = document.querySelectorAll('.score-fill');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.transition = 'width 1.5s ease-out';
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            bars.forEach(bar => observer.observe(bar));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStatus();
+            animateScoreBars();
+        });
+    </script>
+</body>
+</html>
