@@ -151,6 +151,46 @@ npm install
 npm install -g @mcp/intellibench
 ```
 
+### ☁️ Vercel Deployment (Cloud Hosting)
+
+Deploy MCP IntelliBench to Vercel for cloud access:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/quangminh1212/MCP_IntelliBench)
+
+**Manual Deployment:**
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy to Vercel
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+**Endpoints after deployment:**
+- Health Check: `https://your-app.vercel.app/api/health`
+- MCP Server: `https://your-app.vercel.app/api/mcp`
+- SSE Transport: `https://your-app.vercel.app/api/mcp/sse`
+
+**Configure MCP Client for Vercel:**
+
+```json
+{
+  "mcpServers": {
+    "intellibench-cloud": {
+      "transport": {
+        "type": "sse",
+        "url": "https://your-app.vercel.app/api/mcp/sse"
+      }
+    }
+  }
+}
+```
+
+
 ## ⚙️ Configuration
 
 ### Environment Variables
