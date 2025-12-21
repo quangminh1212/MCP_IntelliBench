@@ -109,7 +109,7 @@
 
 ```bash
 # Clone and setup
-git clone https://github.com/yourusername/MCP_IntelliBench.git
+git clone https://github.com/quangminh1212/MCP_IntelliBench.git
 cd MCP_IntelliBench
 pnpm install
 pnpm build
@@ -480,7 +480,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/MCP_IntelliBench.git
+git clone https://github.com/quangminh1212/MCP_IntelliBench.git
 cd MCP_IntelliBench
 
 # Install dependencies

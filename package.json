@@ -15,13 +15,13 @@
     "llm",
     "artificial-intelligence"
   ],
-  "homepage": "https://github.com/yourusername/MCP_IntelliBench",
+  "homepage": "https://github.com/quangminh1212/MCP_IntelliBench",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/MCP_IntelliBench.git"
+    "url": "git+https://github.com/quangminh1212/MCP_IntelliBench.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/MCP_IntelliBench/issues"
+    "url": "https://github.com/quangminh1212/MCP_IntelliBench/issues"
   },
   "engines": {
     "node": ">=20.0.0",
