@@ -43,3 +43,6 @@ temp/
 
 # Test
 .vitest/
+
+# Reports
+reports/
