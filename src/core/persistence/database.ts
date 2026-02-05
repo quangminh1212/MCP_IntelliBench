@@ -256,17 +256,17 @@ export class DatabaseManager {
 
     private rowToSession(row: Record<string, unknown>): Session {
         return {
-            id: row.id as string,
-            name: row.name as string,
-            aiModel: row.ai_model as string | undefined,
-            status: row.status as Session['status'],
-            config: JSON.parse(row.config as string),
-            challengeIds: JSON.parse(row.challenge_ids as string),
-            currentChallengeIndex: row.current_challenge_index as number,
+            id: row['id'] as string,
+            name: row['name'] as string,
+            aiModel: row['ai_model'] as string | undefined,
+            status: row['status'] as Session['status'],
+            config: JSON.parse(row['config'] as string),
+            challengeIds: JSON.parse(row['challenge_ids'] as string),
+            currentChallengeIndex: row['current_challenge_index'] as number,
             results: [],
-            startedAt: row.started_at as string,
-            completedAt: row.completed_at as string | undefined,
-            totalTime: row.total_time as number | undefined,
+            startedAt: row['started_at'] as string,
+            completedAt: row['completed_at'] as string | undefined,
+            totalTime: row['total_time'] as number | undefined,
         };
     }
 
@@ -327,19 +327,19 @@ export class DatabaseManager {
 
     private rowToChallengeResult(row: Record<string, unknown>): ChallengeResult {
         return {
-            challengeId: row.challenge_id as string,
-            sessionId: row.session_id as string,
-            solution: row.solution as string,
-            language: row.language as ChallengeResult['language'],
-            score: row.score as number,
-            maxScore: row.max_score as number,
-            breakdown: JSON.parse(row.breakdown as string),
-            testResults: JSON.parse(row.test_results as string),
-            feedback: row.feedback as string,
-            suggestions: JSON.parse(row.suggestions as string),
-            passed: row.passed === 1,
-            timeTaken: row.time_taken as number,
-            submittedAt: row.submitted_at as string,
+            challengeId: row['challenge_id'] as string,
+            sessionId: row['session_id'] as string,
+            solution: row['solution'] as string,
+            language: row['language'] as ChallengeResult['language'],
+            score: row['score'] as number,
+            maxScore: row['max_score'] as number,
+            breakdown: JSON.parse(row['breakdown'] as string),
+            testResults: JSON.parse(row['test_results'] as string),
+            feedback: row['feedback'] as string,
+            suggestions: JSON.parse(row['suggestions'] as string),
+            passed: row['passed'] === 1,
+            timeTaken: row['time_taken'] as number,
+            submittedAt: row['submitted_at'] as string,
         };
     }
 
@@ -384,21 +384,21 @@ export class DatabaseManager {
         if (!row) return null;
 
         return {
-            sessionId: row.session_id as string,
-            overallScore: row.overall_score as number,
-            maxScore: row.max_score as number,
-            percentage: row.percentage as number,
-            percentile: row.percentile as number,
-            categoryScores: JSON.parse(row.category_scores as string),
-            strengths: JSON.parse(row.strengths as string),
-            weaknesses: JSON.parse(row.weaknesses as string),
-            recommendations: JSON.parse(row.recommendations as string),
-            completedChallenges: row.completed_challenges as number,
-            totalChallenges: row.total_challenges as number,
-            passRate: row.pass_rate as number,
-            totalTime: row.total_time as string,
-            averageTime: row.average_time as string,
-            completedAt: row.completed_at as string,
+            sessionId: row['session_id'] as string,
+            overallScore: row['overall_score'] as number,
+            maxScore: row['max_score'] as number,
+            percentage: row['percentage'] as number,
+            percentile: row['percentile'] as number,
+            categoryScores: JSON.parse(row['category_scores'] as string),
+            strengths: JSON.parse(row['strengths'] as string),
+            weaknesses: JSON.parse(row['weaknesses'] as string),
+            recommendations: JSON.parse(row['recommendations'] as string),
+            completedChallenges: row['completed_challenges'] as number,
+            totalChallenges: row['total_challenges'] as number,
+            passRate: row['pass_rate'] as number,
+            totalTime: row['total_time'] as string,
+            averageTime: row['average_time'] as string,
+            completedAt: row['completed_at'] as string,
         };
     }
 
@@ -479,13 +479,13 @@ export class DatabaseManager {
 
         const rows = stmt.all(...params) as Record<string, unknown>[];
         return rows.map((row) => ({
-            rank: row.rank as number,
-            aiModel: row.ai_model as string,
-            score: row.score as number,
-            maxScore: row.max_score as number,
-            percentage: row.percentage as number,
-            challengesCompleted: row.challenges_completed as number,
-            completedAt: row.completed_at as string,
+            rank: row['rank'] as number,
+            aiModel: row['ai_model'] as string,
+            score: row['score'] as number,
+            maxScore: row['max_score'] as number,
+            percentage: row['percentage'] as number,
+            challengesCompleted: row['challenges_completed'] as number,
+            completedAt: row['completed_at'] as string,
         }));
     }
 

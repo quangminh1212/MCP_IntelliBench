@@ -466,9 +466,10 @@ export class AnalyticsEngine {
     private getIEEELevel(score: number): string {
         const levels = IEEE_2841_LEVELS;
         for (let i = levels.length - 1; i >= 0; i--) {
-            if (score >= levels[i].minScore) return levels[i].name;
+            const level = levels[i];
+            if (level && score >= level.minScore) return level.name;
         }
-        return levels[0].name;
+        return levels[0]?.name ?? 'Beginner';
     }
 
     private calculateISOQuality(results: ChallengeResult[]): number {
