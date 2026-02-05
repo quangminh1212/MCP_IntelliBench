@@ -13,7 +13,16 @@ import type {
     ChallengeCategory,
     Challenge,
 } from '../../shared/types/index.js';
-import { INTERNATIONAL_STANDARDS } from '../../shared/standards/index.js';
+
+// IEEE 2841 Performance Levels
+const IEEE_2841_LEVELS = [
+    { name: 'Beginner', minScore: 0 },
+    { name: 'Basic', minScore: 30 },
+    { name: 'Intermediate', minScore: 50 },
+    { name: 'Proficient', minScore: 65 },
+    { name: 'Advanced', minScore: 80 },
+    { name: 'Expert', minScore: 90 },
+];
 
 // ============================================================================
 // Types
@@ -337,19 +346,22 @@ export class AnalyticsEngine {
         const sorted = [...scores].sort((a, b) => a - b);
         const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
         const median = sorted.length % 2 === 0
-            ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
-            : sorted[Math.floor(sorted.length / 2)];
+            ? ((sorted[sorted.length / 2 - 1] ?? 0) + (sorted[sorted.length / 2] ?? 0)) / 2
+            : (sorted[Math.floor(sorted.length / 2)] ?? 0);
 
         const variance = scores.reduce((sum, s) => sum + Math.pow(s - mean, 2), 0) / scores.length;
         const stdDev = Math.sqrt(variance);
+
+        const minVal = sorted[0] ?? 0;
+        const maxVal = sorted[sorted.length - 1] ?? 0;
 
         return {
             mean: Math.round(mean * 100) / 100,
             median: Math.round(median * 100) / 100,
             stdDev: Math.round(stdDev * 100) / 100,
-            min: sorted[0],
-            max: sorted[sorted.length - 1],
-            range: sorted[sorted.length - 1] - sorted[0],
+            min: minVal,
+            max: maxVal,
+            range: maxVal - minVal,
         };
     }
 
@@ -452,7 +464,7 @@ export class AnalyticsEngine {
     }
 
     private getIEEELevel(score: number): string {
-        const levels = INTERNATIONAL_STANDARDS.IEEE_2841.levels;
+        const levels = IEEE_2841_LEVELS;
         for (let i = levels.length - 1; i >= 0; i--) {
             if (score >= levels[i].minScore) return levels[i].name;
         }
