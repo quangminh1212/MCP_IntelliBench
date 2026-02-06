@@ -10,6 +10,7 @@
 import type { Challenge, ScoreBreakdown, TestCaseResult, ProgrammingLanguage } from '../../shared/types/index.js';
 import { DEFAULT_SCORE_WEIGHTS } from '../../shared/constants/index.js';
 import { CodeExecutionEngine, type TestExecutionResult } from '../execution/engine.js';
+import { logger } from '../../shared/utils/logger.js';
 
 // ============================================================================
 // Types
@@ -97,6 +98,8 @@ export class ScoringEngine {
     private executionEngine?: CodeExecutionEngine;
 
     constructor(config: ScoringConfig = {}) {
+        logger.info('Initializing ScoringEngine', 'ScoringEngine', { config });
+
         this.weights = config.weights ?? DEFAULT_SCORE_WEIGHTS;
         this.passingThreshold = config.passingThreshold ?? 60;
         this.config = {
@@ -106,18 +109,34 @@ export class ScoringEngine {
             ...config,
         };
 
+        logger.debug('ScoringEngine configuration', 'ScoringEngine', {
+            weights: this.weights,
+            passingThreshold: this.passingThreshold,
+            enableRealExecution: this.config.enableRealExecution,
+            enableStaticAnalysis: this.config.enableStaticAnalysis,
+            enableStandardsCheck: this.config.enableStandardsCheck,
+        });
+
         if (this.config.enableRealExecution) {
+            logger.debug('Creating CodeExecutionEngine', 'ScoringEngine');
             this.executionEngine = new CodeExecutionEngine();
         }
+
+        logger.info('ScoringEngine initialized', 'ScoringEngine');
     }
 
     /**
      * Initialize the scoring engine
      */
     async initialize(): Promise<void> {
+        logger.info('Initializing ScoringEngine async components', 'ScoringEngine');
+
         if (this.executionEngine) {
             await this.executionEngine.initialize();
+            logger.debug('CodeExecutionEngine initialized', 'ScoringEngine');
         }
+
+        logger.info('ScoringEngine async initialization complete', 'ScoringEngine');
     }
 
     /**
@@ -126,10 +145,34 @@ export class ScoringEngine {
     async scoreSolution(input: ScoringInput): Promise<ScoringResult> {
         const { challenge, solution, language, timeTaken } = input;
 
+        logger.info('Scoring solution', 'ScoringEngine', {
+            challengeId: challenge.id,
+            challengeTitle: challenge.title,
+            language,
+            timeTaken,
+            solutionLength: solution.length,
+            testCaseCount: challenge.testCases.length,
+        });
+
         // Run test cases (real or simulated)
+        logger.debug('Running test cases', 'ScoringEngine', {
+            challengeId: challenge.id,
+            testCaseCount: challenge.testCases.length,
+            realExecution: this.config.enableRealExecution,
+        });
+
         const testResults = await this.runTestCases(challenge, solution, language);
 
+        logger.debug('Test cases completed', 'ScoringEngine', {
+            challengeId: challenge.id,
+            totalTests: testResults.length,
+            passed: testResults.filter(t => t.passed).length,
+            failed: testResults.filter(t => !t.passed).length,
+        });
+
         // Calculate score breakdown
+        logger.debug('Calculating score breakdown', 'ScoringEngine', { challengeId: challenge.id });
+
         const breakdown: ScoreBreakdown = {
             correctness: this.calcCorrectness(testResults, challenge),
             efficiency: this.calcEfficiency(solution, timeTaken, challenge, testResults),
@@ -138,18 +181,56 @@ export class ScoringEngine {
             creativity: this.calcCreativity(solution, language),
         };
 
+        logger.debug('Score breakdown calculated', 'ScoringEngine', {
+            challengeId: challenge.id,
+            breakdown,
+        });
+
         // Calculate total score
         const totalScore = this.calcWeightedScore(breakdown, challenge.maxScore);
         const percentage = (totalScore / challenge.maxScore) * 100;
         const passed = percentage >= this.passingThreshold;
 
+        logger.info('Score calculated', 'ScoringEngine', {
+            challengeId: challenge.id,
+            totalScore,
+            maxScore: challenge.maxScore,
+            percentage: percentage.toFixed(2),
+            passed,
+            passingThreshold: this.passingThreshold,
+        });
+
         // Compile execution details
         const executionDetails = this.compileExecutionDetails(testResults);
+
+        logger.debug('Execution details compiled', 'ScoringEngine', {
+            challengeId: challenge.id,
+            executionDetails,
+        });
 
         // Check standards compliance
         const standardsCompliance = this.config.enableStandardsCheck
             ? this.checkStandardsCompliance(breakdown, testResults)
             : undefined;
+
+        if (standardsCompliance) {
+            logger.debug('Standards compliance checked', 'ScoringEngine', {
+                challengeId: challenge.id,
+                standardsCompliance,
+            });
+        }
+
+        const feedback = this.generateFeedback(percentage, passed, breakdown);
+        const suggestions = this.generateSuggestions(breakdown, solution);
+
+        logger.info('Scoring complete', 'ScoringEngine', {
+            challengeId: challenge.id,
+            totalScore,
+            passed,
+            grade: standardsCompliance?.overallGrade,
+            feedbackLength: feedback.length,
+            suggestionsCount: suggestions.length,
+        });
 
         return {
             totalScore,
@@ -157,8 +238,8 @@ export class ScoringEngine {
             passed,
             breakdown,
             testResults,
-            feedback: this.generateFeedback(percentage, passed, breakdown),
-            suggestions: this.generateSuggestions(breakdown, solution),
+            feedback,
+            suggestions,
             executionDetails,
             standardsCompliance,
         };
@@ -172,20 +253,47 @@ export class ScoringEngine {
         solution: string,
         language: ProgrammingLanguage
     ): Promise<TestCaseResult[]> {
+        logger.debug('runTestCases called', 'ScoringEngine', {
+            challengeId: challenge.id,
+            language,
+            testCaseCount: challenge.testCases.length,
+            hasExecutionEngine: !!this.executionEngine,
+            enableRealExecution: this.config.enableRealExecution,
+        });
+
         if (this.config.enableRealExecution && this.executionEngine) {
             try {
+                logger.info('Executing tests with real execution engine', 'ScoringEngine', {
+                    challengeId: challenge.id,
+                    language,
+                });
+
                 const execResults = await this.executionEngine.executeWithTests(
                     solution,
                     language,
                     challenge.testCases
                 );
+
+                logger.info('Real execution completed', 'ScoringEngine', {
+                    challengeId: challenge.id,
+                    resultsCount: execResults.length,
+                    passed: execResults.filter(r => r.result.passed).length,
+                });
+
                 return execResults.map(r => r.result);
             } catch (error) {
                 // Fallback to simulation on execution error
-                console.warn('Execution failed, falling back to simulation:', error);
+                logger.warn('Execution failed, falling back to simulation', 'ScoringEngine', {
+                    challengeId: challenge.id,
+                    error: error instanceof Error ? error.message : String(error),
+                });
                 return this.simulateTestCases(challenge, solution);
             }
         }
+
+        logger.debug('Using simulated test execution', 'ScoringEngine', {
+            challengeId: challenge.id,
+        });
 
         return this.simulateTestCases(challenge, solution);
     }
@@ -194,11 +302,23 @@ export class ScoringEngine {
      * Simulate test case execution (fallback)
      */
     private simulateTestCases(challenge: Challenge, solution: string): TestCaseResult[] {
+        logger.debug('Simulating test cases', 'ScoringEngine', {
+            challengeId: challenge.id,
+            testCaseCount: challenge.testCases.length,
+            solutionLength: solution.length,
+        });
+
         const hasValidStructure = solution.length > 50 &&
             /function|class|const|=>/.test(solution);
         const hasProperLogic = /return|if|for|while|map|filter|reduce/.test(solution);
 
-        return challenge.testCases.map((tc, index) => {
+        logger.debug('Solution analysis for simulation', 'ScoringEngine', {
+            challengeId: challenge.id,
+            hasValidStructure,
+            hasProperLogic,
+        });
+
+        const results = challenge.testCases.map((tc, index) => {
             // Simulate based on code analysis
             const basePassChance = hasValidStructure && hasProperLogic ? 0.7 : 0.3;
             const complexity = tc.isHidden ? 0.8 : 1.0;
@@ -213,6 +333,15 @@ export class ScoringEngine {
                 error: passed ? undefined : 'Simulated test failure',
             };
         });
+
+        logger.debug('Simulation complete', 'ScoringEngine', {
+            challengeId: challenge.id,
+            totalTests: results.length,
+            passed: results.filter(r => r.passed).length,
+            failed: results.filter(r => !r.passed).length,
+        });
+
+        return results;
     }
 
     /**
