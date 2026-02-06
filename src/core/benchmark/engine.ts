@@ -28,6 +28,7 @@ import {
     shuffleArray,
     average,
 } from '../../shared/utils/index.js';
+import { logger } from '../../shared/utils/logger.js';
 import { CATEGORY_DISPLAY_NAMES, LIMITS } from '../../shared/constants/index.js';
 import type { ChallengeRepository } from '../challenges/repository.js';
 import type { ScoringEngine } from '../scoring/engine.js';
@@ -89,14 +90,25 @@ export class BenchmarkEngine {
      * @returns The created session
      */
     async startSession(options: StartSessionOptions = {}): Promise<Session> {
+        logger.info('Starting new benchmark session', 'BenchmarkEngine', { options });
+
         // Get challenges based on filters
+        logger.debug('Fetching challenges with filters', 'BenchmarkEngine', {
+            category: options.categories?.[0],
+            difficulty: options.difficulty,
+            limit: options.maxChallenges ?? LIMITS.DEFAULT_CHALLENGES_PER_SESSION,
+        });
+
         const challenges = await this.challengeRepository.listChallenges({
             category: options.categories?.[0],
             difficulty: options.difficulty,
             limit: options.maxChallenges ?? LIMITS.DEFAULT_CHALLENGES_PER_SESSION,
         });
 
+        logger.debug('Challenges fetched', 'BenchmarkEngine', { count: challenges.length });
+
         if (challenges.length === 0) {
+            logger.warn('No challenges match criteria', 'BenchmarkEngine', { options });
             throw new Error('No challenges match the specified criteria');
         }
 
@@ -111,6 +123,12 @@ export class BenchmarkEngine {
         );
 
         const selectedChallenges = orderedChallenges.slice(0, maxChallenges);
+
+        logger.debug('Challenges selected', 'BenchmarkEngine', {
+            total: challenges.length,
+            selected: selectedChallenges.length,
+            randomized: options.randomize !== false,
+        });
 
         // Create session config
         const config: SessionConfig = {
@@ -133,7 +151,15 @@ export class BenchmarkEngine {
             startedAt: getCurrentTimestamp(),
         };
 
+        logger.info('Session created', 'BenchmarkEngine', {
+            sessionId: session.id,
+            sessionName: session.name,
+            challengeCount: session.challengeIds.length,
+            challengeIds: session.challengeIds,
+        });
+
         await this.sessionManager.saveSession(session);
+        logger.debug('Session saved to manager', 'BenchmarkEngine', { sessionId: session.id });
 
         return session;
     }
@@ -144,17 +170,29 @@ export class BenchmarkEngine {
      * @returns Current challenge or null if session is complete
      */
     async getCurrentChallenge(sessionId: string): Promise<Challenge | null> {
+        logger.debug('Getting current challenge', 'BenchmarkEngine', { sessionId });
+
         const session = await this.sessionManager.getSession(sessionId);
 
         if (!session) {
+            logger.error('Session not found', 'BenchmarkEngine', undefined, { sessionId });
             throw new Error(`Session not found: ${sessionId}`);
         }
 
+        logger.debug('Session retrieved', 'BenchmarkEngine', {
+            sessionId,
+            status: session.status,
+            currentIndex: session.currentChallengeIndex,
+            totalChallenges: session.challengeIds.length,
+        });
+
         if (session.status === 'completed') {
+            logger.info('Session already completed', 'BenchmarkEngine', { sessionId });
             return null;
         }
 
         if (session.currentChallengeIndex >= session.challengeIds.length) {
+            logger.info('All challenges completed, marking session complete', 'BenchmarkEngine', { sessionId });
             // Mark session as completed
             await this.completeSession(sessionId);
             return null;
@@ -162,10 +200,29 @@ export class BenchmarkEngine {
 
         const challengeId = session.challengeIds[session.currentChallengeIndex];
         if (!challengeId) {
+            logger.warn('No challenge ID at current index', 'BenchmarkEngine', {
+                sessionId,
+                currentIndex: session.currentChallengeIndex,
+            });
             return null;
         }
 
-        return this.challengeRepository.getChallenge(challengeId);
+        logger.debug('Fetching challenge', 'BenchmarkEngine', { challengeId });
+        const challenge = await this.challengeRepository.getChallenge(challengeId);
+
+        if (challenge) {
+            logger.info('Current challenge retrieved', 'BenchmarkEngine', {
+                sessionId,
+                challengeId: challenge.id,
+                title: challenge.title,
+                category: challenge.category,
+                difficulty: challenge.difficulty,
+            });
+        } else {
+            logger.warn('Challenge not found in repository', 'BenchmarkEngine', { challengeId });
+        }
+
+        return challenge;
     }
 
     /**
@@ -182,38 +239,90 @@ export class BenchmarkEngine {
         solution: string,
         language: string
     ): Promise<ChallengeResult> {
+        logger.info('Submitting solution', 'BenchmarkEngine', {
+            sessionId,
+            challengeId,
+            language,
+            solutionLength: solution.length,
+        });
+
         const session = await this.sessionManager.getSession(sessionId);
 
         if (!session) {
+            logger.error('Session not found for solution submission', 'BenchmarkEngine', undefined, { sessionId });
             throw new Error(`Session not found: ${sessionId}`);
         }
 
+        logger.debug('Session state for submission', 'BenchmarkEngine', {
+            sessionId,
+            status: session.status,
+            currentIndex: session.currentChallengeIndex,
+            resultsCount: session.results.length,
+        });
+
         if (session.status !== 'in_progress') {
+            logger.error('Session not in progress', 'BenchmarkEngine', undefined, {
+                sessionId,
+                status: session.status,
+            });
             throw new Error(`Session is not in progress: ${session.status}`);
         }
 
         // Verify this is the current challenge
         const currentChallengeId = session.challengeIds[session.currentChallengeIndex];
         if (currentChallengeId !== challengeId) {
+            logger.error('Challenge mismatch', 'BenchmarkEngine', undefined, {
+                sessionId,
+                expected: currentChallengeId,
+                received: challengeId,
+            });
             throw new Error(`Challenge mismatch. Expected: ${currentChallengeId}, got: ${challengeId}`);
         }
 
         // Get challenge details
         const challenge = await this.challengeRepository.getChallenge(challengeId);
         if (!challenge) {
+            logger.error('Challenge not found', 'BenchmarkEngine', undefined, { challengeId });
             throw new Error(`Challenge not found: ${challengeId}`);
         }
+
+        logger.debug('Challenge details for scoring', 'BenchmarkEngine', {
+            challengeId,
+            title: challenge.title,
+            maxScore: challenge.maxScore,
+            timeLimit: challenge.timeLimit,
+        });
 
         // Calculate time taken
         const submissionTime = getCurrentTimestamp();
         const timeTaken = this.calculateTimeTaken(session, challenge);
 
+        logger.debug('Time calculation', 'BenchmarkEngine', {
+            sessionId,
+            challengeId,
+            timeTaken,
+            submissionTime,
+        });
+
         // Score the solution
+        logger.info('Scoring solution', 'BenchmarkEngine', { sessionId, challengeId, language });
+
         const scoringResult = await this.scoringEngine.scoreSolution({
             challenge,
             solution,
             language: language as ProgrammingLanguage,
             timeTaken,
+        });
+
+        logger.info('Scoring complete', 'BenchmarkEngine', {
+            sessionId,
+            challengeId,
+            totalScore: scoringResult.totalScore,
+            maxScore: challenge.maxScore,
+            passed: scoringResult.passed,
+            breakdown: scoringResult.breakdown,
+            testsPassed: scoringResult.testResults.filter(t => t.passed).length,
+            testsTotal: scoringResult.testResults.length,
         });
 
         // Create challenge result
@@ -234,13 +343,22 @@ export class BenchmarkEngine {
         };
 
         // Update session
+        logger.debug('Saving result to session', 'BenchmarkEngine', { sessionId, challengeId });
         await this.sessionManager.addResult(sessionId, result);
         await this.sessionManager.advanceChallenge(sessionId);
 
         // Check if session is complete
         if (session.currentChallengeIndex + 1 >= session.challengeIds.length) {
+            logger.info('Session complete after this submission', 'BenchmarkEngine', { sessionId });
             await this.completeSession(sessionId);
         }
+
+        logger.info('Solution submission complete', 'BenchmarkEngine', {
+            sessionId,
+            challengeId,
+            score: result.score,
+            passed: result.passed,
+        });
 
         return result;
     }
