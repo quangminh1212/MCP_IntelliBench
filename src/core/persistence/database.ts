@@ -10,6 +10,7 @@
 import Database from 'better-sqlite3';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import { getDataDir, logger } from '../../shared/utils/logger.js';
 import type {
     Session,
     ChallengeResult,
@@ -128,13 +129,23 @@ export class DatabaseManager {
     private readonly dbPath: string;
 
     constructor(dbPath?: string) {
-        const dataDir = join(process.cwd(), '.intellibench', 'data');
+        // Use APPDATA directory for portable mode instead of process.cwd()
+        const dataDir = getDataDir();
         if (!existsSync(dataDir)) {
             mkdirSync(dataDir, { recursive: true });
         }
         this.dbPath = dbPath ?? join(dataDir, 'intellibench.db');
-        this.db = new Database(this.dbPath);
-        this.initialize();
+
+        logger.info(`Database path: ${this.dbPath}`, 'Database');
+
+        try {
+            this.db = new Database(this.dbPath);
+            this.initialize();
+            logger.info('Database initialized successfully', 'Database');
+        } catch (err) {
+            logger.error('Failed to initialize database', 'Database', err instanceof Error ? err : undefined, { dbPath: this.dbPath });
+            throw err;
+        }
     }
 
     /**
